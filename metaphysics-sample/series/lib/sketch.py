@@ -285,8 +285,12 @@ class Sketch:
             self.circle(cx, hy - r - 12, r * 0.35, 3.6)
             self.curve([(cx - r, hy - 6), (cx - r * 0.5, hy - r * 0.9), (cx + r * 0.5, hy - r * 0.9), (cx + r, hy - 6)], 3.6)
         elif hair == "spike":
-            self.poly([(cx - r * 0.9, hy - r * 0.4), (cx - r * 0.6, hy - r * 1.2), (cx - r * 0.25, hy - r * 0.8), (cx, hy - r * 1.35),
-                       (cx + r * 0.3, hy - r * 0.8), (cx + r * 0.65, hy - r * 1.2), (cx + r * 0.9, hy - r * 0.4)], 3.6)
+            pts = []
+            for i in range(9):
+                a = math.radians(205 + i * 16.25)
+                rr = r * (1.0 if i % 2 == 0 else 1.28)
+                pts.append((cx + rr * math.cos(a), hy + rr * math.sin(a)))
+            self.poly(pts, 3.6)
         elif hair == "curly":
             for i in range(7):
                 t = math.radians(200 + i * 23)
@@ -487,3 +491,94 @@ class Sketch:
             fl = [(cx, gy - h - 62), (cx + 16, gy - h - 30), (cx, gy - h - 14), (cx - 16, gy - h - 30)]
             self.curve(fl, 3.4, closed=True)
             self.fill(fl, ORANGE, 8)
+
+    def check(self, x, y, s=1.0, c="#2fa84f", w=8.0):
+        self.poly([(x - 26 * s, y), (x - 6 * s, y + 24 * s), (x + 30 * s, y - 28 * s)], w, c)
+
+    def cross(self, x, y, s=1.0, c=CORAL, w=8.0):
+        self.line((x - 24 * s, y - 24 * s), (x + 24 * s, y + 24 * s), w, c)
+        self.line((x + 24 * s, y - 24 * s), (x - 24 * s, y + 24 * s), w, c)
+
+    def tablet(self, cx, cy, w=220, h=150, color="#dfe3ea"):
+        pts = [(cx - w / 2, cy + h / 2), (cx - w / 2, cy - h / 2 + 40)] + \
+            self.epts(cx, cy - h / 2 + 40, w / 2, 40, 180, 360, n=14)[1:-1] + [(cx + w / 2, cy - h / 2 + 40), (cx + w / 2, cy + h / 2)]
+        self.curve(pts + [pts[0]], 4.2)
+        self.fill(pts, color)
+        self.line((cx, cy - h / 2 + 10), (cx, cy + h / 2 - 14), 3.4)
+        self.check(cx - w / 4, cy + 8, 0.9)
+        self.cross(cx + w / 4, cy + 8, 0.8)
+
+    def bubble(self, cx, cy, rx, ry, tail):
+        """对话气泡，tail 为尾巴尖端坐标。"""
+        a = math.degrees(math.atan2(tail[1] - cy, tail[0] - cx))
+        pts = self.epts(cx, cy, rx, ry, a + 12, a + 348, n=30)
+        self.curve(pts + [tail, pts[0]], 4.0)
+        return pts
+
+    def clock(self, cx, cy, r, color=None):
+        self.circle(cx, cy, r)
+        if color:
+            self.fill_ell(cx, cy, r - 2, r - 2, color)
+        for k in range(12):
+            t = math.radians(k * 30)
+            self.line((cx + r * 0.8 * math.cos(t), cy + r * 0.8 * math.sin(t)), (cx + r * 0.9 * math.cos(t), cy + r * 0.9 * math.sin(t)), 2.4)
+        self.line((cx, cy), (cx, cy - r * 0.6), 3.6)
+        self.line((cx, cy), (cx + r * 0.45, cy + r * 0.1), 3.6)
+
+    def house(self, cx, gy, w=200, h=140, roof=CORAL, wall=CREAM):
+        wall_pts = [(cx - w / 2, gy), (cx - w / 2, gy - h), (cx + w / 2, gy - h), (cx + w / 2, gy)]
+        self.poly(wall_pts, 4.0, closed=True)
+        self.fill(wall_pts, wall)
+        rf = [(cx - w / 2 - 20, gy - h), (cx, gy - h - w * 0.45), (cx + w / 2 + 20, gy - h)]
+        self.poly(rf, 4.2, closed=True)
+        self.fill(rf, roof)
+        door = [(cx - w * 0.12, gy), (cx - w * 0.12, gy - h * 0.55), (cx + w * 0.12, gy - h * 0.55), (cx + w * 0.12, gy)]
+        self.poly(door, 3.6)
+        self.fill(door, BROWN, 9)
+        win = [(cx + w * 0.22, gy - h * 0.75), (cx + w * 0.4, gy - h * 0.75), (cx + w * 0.4, gy - h * 0.5), (cx + w * 0.22, gy - h * 0.5)]
+        self.poly(win, 3.2, closed=True)
+        self.fill(win, SKY, 8)
+
+    def fish(self, x, y, k=1.0, color=SKY):
+        body = self.epts(x, y, 34 * k, 18 * k, 0, 360, n=18)[:-1]
+        self.curve(body + body[:1], 3.6)
+        self.fill(body, color, 9)
+        tail = [(x - 32 * k, y), (x - 56 * k, y - 16 * k), (x - 52 * k, y + 16 * k)]
+        self.poly(tail, 3.4, closed=True)
+        self.fill(tail, color, 8)
+        self.dot(x + 18 * k, y - 4 * k, 4)
+
+    def chicken(self, x, y, k=1.0, face=1):
+        """站立的小鸡，face=1 朝右。(x, y) 为身体中心。"""
+        P = lambda u, v: (x + face * u * k, y + v * k)
+        body = [P(-60, 0), P(-40, -40), P(10, -44), P(40, -20), P(50, 20), P(10, 50), P(-40, 44)]
+        self.curve(body, 4.0, closed=True)
+        self.fill(body, "#ffffff")
+        self.circle(*P(40, -60), 28 * k, 4.0)
+        for u in (24, 40, 56):
+            self.arc(*P(u, -92), 9 * k, 10 * k, 180, 360, 3.4, CORAL)
+        self.fill([P(18, -88), P(62, -88), P(58, -100), P(22, -100)], CORAL, 8)
+        bk = [P(66, -64), P(86, -56), P(66, -50)]
+        self.poly(bk, 3.4, closed=True)
+        self.fill(bk, ORANGE, 7)
+        self.dot(*P(48, -66), 5)
+        self.curve([P(-20, -6), P(0, 14), P(-30, 20)], 3.2)
+        for u in (-10, 20):
+            self.line(P(u, 50), P(u, 84), 3.6, ORANGE)
+            self.line(P(u, 84), P(u + 14, 88), 3.4, ORANGE)
+
+    def duck(self, x, y, k=1.0, face=1):
+        P = lambda u, v: (x + face * u * k, y + v * k)
+        body = [P(-64, -10), P(-30, -30), P(20, -30), P(54, 0), P(30, 40), P(-30, 44), P(-60, 20)]
+        self.curve(body, 4.0, closed=True)
+        self.fill(body, YEL)
+        self.circle(*P(36, -62), 28 * k, 4.0)
+        self.fill_ell(*P(36, -62), 26 * k, 26 * k, YEL)
+        bill = [P(58, -62), P(92, -60), P(92, -48), P(58, -48)]
+        self.curve(bill, 3.4, closed=True)
+        self.fill(bill, ORANGE, 7)
+        self.dot(*P(42, -70), 5)
+        self.curve([P(-30, 0), P(0, 18), P(-24, 22)], 3.2)
+        for u in (-10, 20):
+            self.line(P(u, 42), P(u, 76), 3.6, ORANGE)
+            self.poly([P(u - 8, 80), P(u, 76), P(u + 16, 82)], 3.4, ORANGE)
