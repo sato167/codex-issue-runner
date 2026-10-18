@@ -25,3 +25,17 @@ MINIMAX_API_KEY=sk-api-... python tools/make_sample.py \
 ```
 
 可选参数：`--voice`（音色名或 voice_id，会先在账号音色列表里匹配 janey）、`--model`（默认 `speech-2.6-hd`）、`MINIMAX_HOST`（默认依次尝试 `api.minimaxi.com`、`api.minimax.io`）。
+
+## v2（自研矢量渲染，推荐）
+
+`v2/` 是在 v1 基础上重新做的一版，画面和节奏都和参考仓库区分开：
+
+- **说的和画的一一对应**：按短句分段配音（`v2/script.json` 每个短句绑定一个画面元素），说到哪画到哪
+- **逐笔动画**：笔尖沿真实笔画行进，马克笔来回涂色；手和笔是自己画的
+- **镜头**：推近正在画的元素，每幕结束拉远看全貌；幕间翻页转场
+- **画面**：方格纸底、更亮的配色、霞鹜文楷手写字幕，荧光笔随语音推进
+
+```bash
+MINIMAX_API_KEY=sk-api-... python v2/make.py            # 输出 metaphysics-v2.mp4
+python v2/make.py --scenes 4                             # 只重渲染第 4 幕并重新合并
+```
