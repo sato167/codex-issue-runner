@@ -59,7 +59,7 @@ def build_copy(meta: dict) -> str:
     for e in meta["episodes"]:
         n, cover = e["ep"], e["cover"]
         title = f"{e['hook']}｜{cover}"
-        if len(title) > TITLE_MAX:
+        if len(title) > TITLE_MAX or cover in e["hook"]:
             title = e["hook"]
         assert len(title) <= TITLE_MAX, (n, title)
         tags = meta.get("base_tags", ["白话形而上学", "亚里士多德", "哲学"]) + e["tags"][:2]
