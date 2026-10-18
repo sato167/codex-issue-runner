@@ -217,7 +217,7 @@ def main() -> None:
         af.append(f"{au}[{k}:a]acrossfade=d={XFADE}[a{k}]")
         v, au = f"[v{k}]", f"[a{k}]"
     run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", ";".join(vf + af),
-         "-map", v, "-map", au, "-c:v", "libx264", "-crf", "20", "-pix_fmt", "yuv420p",
+         "-map", v, "-map", au, "-c:v", "libx264", "-crf", "24", "-pix_fmt", "yuv420p",
          "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", str(out)])
     print(f"OUTPUT={out}")
 
