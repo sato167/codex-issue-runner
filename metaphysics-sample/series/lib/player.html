@@ -19,6 +19,21 @@
   #cap i { font-style: normal; background-repeat: no-repeat; background-position: 0 88%; background-size: 0% 38%;
            background-image: linear-gradient(#ffd23f, #ffd23f); }
   #preload { position: absolute; opacity: 0; font: 700 20px 'LXGW WenKai'; }
+  #vhead, #vfoot { display: none; }
+  /* 竖屏 9:16：顶部标题区 + 中间画布 + 底部大字幕 */
+  body.v { width: 1080px; height: 1920px; }
+  body.v .badge, body.v .chip { display: none; }
+  body.v #vhead { display: block; position: absolute; left: 0; top: 0; width: 1080px; height: 420px; font-family: 'LXGW WenKai', sans-serif; color: #22304a; }
+  body.v #vhead .brand { position: absolute; left: 64px; top: 70px; font-size: 44px; font-weight: 700; letter-spacing: 2px; }
+  body.v #vhead .ep { position: absolute; left: 64px; top: 146px; font-size: 32px; font-weight: 700; background: #fff; border: 4px solid #22304a;
+                      border-radius: 36px; padding: 4px 22px; box-shadow: 5px 5px 0 #ffd23f; }
+  body.v #vhead .vtitle { position: absolute; left: 58px; top: 222px; font-size: 96px; font-weight: 700; letter-spacing: 2px; white-space: nowrap; }
+  body.v #vhead .vtitle span { background: linear-gradient(transparent 62%, rgba(255, 210, 63, .85) 62%); padding: 0 6px; }
+  body.v #vhead .vscene { position: absolute; right: 64px; top: 150px; font-size: 30px; font-weight: 700; color: #3d5a80; }
+  body.v #cap { left: 60px; right: 60px; top: 1570px; bottom: auto; transform: none; max-width: none; white-space: normal; text-align: center; text-wrap: balance;
+                font-size: 60px; line-height: 1.4; padding: 18px 28px 22px; z-index: 5; }
+  body.v #cap i { -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+  body.v #vfoot { display: block; position: absolute; left: 0; right: 0; bottom: 46px; text-align: center; font: 700 30px 'LXGW WenKai', sans-serif; color: #9aa5b8; letter-spacing: 4px; }
 </style>
 </head>
 <body>
@@ -39,10 +54,14 @@
 <div class="chip" id="chip"></div>
 <div id="cap"></div>
 <div id="preload"></div>
+<div id="vhead"><div class="brand">白话《形而上学》</div><div class="ep" id="vep"></div><div class="vscene" id="vscene"></div><div class="vtitle"><span id="vtitle"></span></div></div>
+<div id="vfoot">一卷一集 · 跟着笔尖读完亚里士多德</div>
 <script>
 const NS = 'http://www.w3.org/2000/svg';
-const W = 1600, H = 900;
+const W = 1600, H = 900;   // 线稿坐标系
 let DATA, TL, S;   // 线稿数据、时间轴、当前场景状态
+// 输出画面与画布位置：横屏画布铺满；竖屏画布在标题区和字幕区之间
+let G = { OW: 1600, OH: 900, SX: 0, SY: 0, SW: 1600, SH: 900, vertical: false };
 
 const ease = t => t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t);
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -66,6 +85,18 @@ function buildHand() {
 
 function init(data, timeline) {
   DATA = data; TL = timeline;
+  if (TL.layout === 'vertical') {
+    G = { OW: 1080, OH: 1920, SX: 0, SY: 420, SW: 1080, SH: 1120, vertical: true };
+    document.body.classList.add('v');
+    const parts = TL.subtitle.split(' · ');
+    document.getElementById('vep').textContent = parts[0] + ' · ' + parts[1];
+    document.getElementById('vtitle').textContent = parts.slice(2).join(' · ');
+    const stage = document.getElementById('stage');
+    Object.assign(stage.style, { inset: 'auto', left: G.SX + 'px', top: G.SY + 'px' });
+    stage.setAttribute('width', G.SW); stage.setAttribute('height', G.SH);
+    const hand = document.getElementById('hand');
+    hand.setAttribute('width', G.OW); hand.setAttribute('height', G.OH);
+  }
   document.getElementById('title').textContent = TL.title;
   document.getElementById('subtitle').textContent = TL.subtitle;
   document.getElementById('preload').textContent = TL.scenes.map(s => s.name + s.phrases.map(p => p.text).join('')).join('') + '①②③④⑤⑥⑦⑧';
@@ -73,7 +104,25 @@ function init(data, timeline) {
   return document.fonts.ready.then(() => true);
 }
 
+function fitBoxV([x, y, w, h]) {
+  const A = G.SW / G.SH, pad = 40;
+  x -= pad; y -= pad; w += pad * 2; h += pad * 2;
+  if (w / h < A) { const nw = h * A; x -= (nw - w) / 2; w = nw; } else { const nh = w / A; y -= (nh - h) / 2; h = nh; }
+  if (w < 720) { const k = 720 / w; x -= (720 - w) / 2; y -= (h * k - h) / 2; h *= k; w = 720; }
+  if (w > W) { const k = W / w; y += (h - h * k) / 2; h *= k; w = W; }
+  x = Math.max(0, Math.min(W - w, x));
+  y = h <= H ? Math.max(0, Math.min(H - h, y)) : H / 2 - h / 2;
+  return [x, y, w, h];
+}
+
+function fullBox() {
+  if (!G.vertical) return [0, 0, W, H];
+  const h = W * G.SH / G.SW;
+  return [0, H / 2 - h / 2, W, h];
+}
+
 function fitBox([x, y, w, h]) {
+  if (G.vertical) return fitBoxV([x, y, w, h]);
   const pad = 50;
   x -= pad; y -= pad + 50; w += pad * 2; h += pad * 2 + 140;   // 顶部给标题、底部给字幕让位
   if (w / h < W / H) { const nw = h * W / H; x -= (nw - w) / 2; w = nw; } else { const nh = w * H / W; y -= (nh - h) / 2; h = nh; }
@@ -86,6 +135,7 @@ function fitBox([x, y, w, h]) {
 function setup(sceneIndex) {
   const sc = TL.scenes[sceneIndex];
   document.getElementById('chip').textContent = '①②③④⑤⑥⑦⑧'[sceneIndex] + ' ' + sc.name;
+  document.getElementById('vscene').textContent = '①②③④⑤⑥⑦⑧'[sceneIndex] + ' ' + sc.name;
   const fills = document.getElementById('fills'), strokes = document.getElementById('strokes'), clips = document.getElementById('clips');
   fills.innerHTML = strokes.innerHTML = clips.innerHTML = '';
   const els = [];
@@ -135,7 +185,7 @@ function setup(sceneIndex) {
 
 function cameraAt(t) {
   const { els, endDraw } = S;
-  const full = [0, 0, W, H];
+  const full = fullBox();
   let vb = els[0].box;
   for (let i = 1; i < els.length; i++) {
     const k = ease((t - (els[i].t0 - 0.35)) / 0.7);
@@ -161,17 +211,18 @@ function frame(t) {
   const vb = cameraAt(t);
   document.getElementById('stage').setAttribute('viewBox', vb.map(v => v.toFixed(2)).join(' '));
   // 手：作画时跟随笔尖；两句之间停在最后一笔；画完后退出画面
-  const sc = W / vb[2];
+  const sc = G.SW / vb[2];
+  const toScreen = q => [G.SX + (q.x - vb[0]) * sc, G.SY + (q.y - vb[1]) * sc];
+  const OFF = [G.OW + 150, G.OH + 150];
   let hx, hy;
-  if (pen) { hx = (pen.x - vb[0]) * sc; hy = (pen.y - vb[1]) * sc; S.lastPen = pen; }
+  if (pen) { [hx, hy] = toScreen(pen); S.lastPen = pen; }
   else {
     const first = S.els[0].segs[0];
-    if (t < first.t0) { const k = ease((t - first.t0 + 0.6) / 0.6); const a = first.it.a; hx = lerp(1750, (a.x - vb[0]) * sc, k); hy = lerp(1050, (a.y - vb[1]) * sc, k); }
+    if (t < first.t0) { const k = ease((t - first.t0 + 0.6) / 0.6); const [ax, ay] = toScreen(first.it.a); hx = lerp(OFF[0], ax, k); hy = lerp(OFF[1], ay, k); }
     else {
-      const lp = S.lastPen || S.els[0].last;
-      hx = (lp.x - vb[0]) * sc; hy = (lp.y - vb[1]) * sc;
+      [hx, hy] = toScreen(S.lastPen || S.els[0].last);
       const k = ease((t - S.endDraw - 0.1) / 0.6);
-      hx = lerp(hx, 1750, k); hy = lerp(hy, 1050, k);
+      hx = lerp(hx, OFF[0], k); hy = lerp(hy, OFF[1], k);
     }
   }
   const wob = Math.sin(t * 9) * 1.6, lift = lifted ? -10 : 0;

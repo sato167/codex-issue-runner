@@ -18,9 +18,11 @@ const tmp = join(mkdtempSync(join(tmpdir(), 'wb-')), 'player.html');
 writeFileSync(tmp, html);
 
 const browser = await chromium.launch({ args: ['--allow-file-access-from-files'] });
-const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
+const TLDATA = JSON.parse(readFileSync(tlPath, 'utf8'));
+const [VW, VH] = TLDATA.layout === 'vertical' ? [1080, 1920] : [1600, 900];
+const page = await browser.newPage({ viewport: { width: VW, height: VH } });
 await page.goto(pathToFileURL(tmp).href);
-await page.evaluate(([d, t]) => init(d, t), [JSON.parse(readFileSync(scenesPath, 'utf8')), JSON.parse(readFileSync(tlPath, 'utf8'))]);
+await page.evaluate(([d, t]) => init(d, t), [JSON.parse(readFileSync(scenesPath, 'utf8')), TLDATA]);
 if (idxStr === 'stills') {           // 预览：每幕最后一帧（全部画完）
   const { mkdirSync } = await import('node:fs');
   mkdirSync(outPath, { recursive: true });

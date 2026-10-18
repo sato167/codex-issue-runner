@@ -128,6 +128,7 @@ def main() -> None:
     ap.add_argument("--scenes", default=None, help="只渲染这些幕，如 1,3")
     ap.add_argument("--preview", action="store_true", help="不配音，输出每幕完成图")
     ap.add_argument("--fps", type=int, default=30)
+    ap.add_argument("--vertical", action="store_true", help="出 9:16 竖屏版 → out/epXX_竖屏.mp4")
     a = ap.parse_args()
 
     ep_dir = HERE / f"ep{a.ep:02d}"
@@ -148,7 +149,9 @@ def main() -> None:
             tts = MiniMaxTTS(a.voice or "janey", a.model or "speech-2.6-hd")
 
     # 1) 逐短句配音 + 时间轴
-    timeline = {"title": script["title"], "subtitle": script["subtitle"], "scenes": []}
+    timeline = {"title": script["title"], "subtitle": script["subtitle"], "scenes": [],
+                "layout": "vertical" if a.vertical else "landscape"}
+    vs = "-v" if a.vertical else ""   # 竖屏版的中间文件后缀
     texts_path = audio / "texts.json"
     cached = json.loads(texts_path.read_text(encoding="utf-8")) if texts_path.exists() else {}
     for sc in script["scenes"]:
@@ -168,7 +171,7 @@ def main() -> None:
     if not a.preview:
         texts = {f"{sc['id']}-{i:02d}.wav": p["text"] for sc in script["scenes"] for i, p in enumerate(sc["phrases"], 1)}
         texts_path.write_text(json.dumps(texts, ensure_ascii=False, indent=1), encoding="utf-8")
-    tl_path = build / "timeline.json"
+    tl_path = build / f"timeline{vs}.json"
     tl_path.write_text(json.dumps(timeline, ensure_ascii=False, indent=2), encoding="utf-8")
 
     css = font_css()
@@ -182,7 +185,7 @@ def main() -> None:
     pick = [int(x) - 1 for x in a.scenes.split(",")] if a.scenes else range(len(timeline["scenes"]))
     for idx in pick:
         sc = timeline["scenes"][idx]
-        silent, final = build / f"{sc['id']}-silent.mp4", build / f"{sc['id']}.mp4"
+        silent, final = build / f"{sc['id']}{vs}-silent.mp4", build / f"{sc['id']}{vs}.mp4"
         run([*render, str(idx), str(silent), str(css), str(a.fps)])
         inputs, filt, labels = ["-i", str(silent)], [], []
         for k, ph in enumerate(sc["phrases"]):
@@ -197,12 +200,12 @@ def main() -> None:
         print(f"[完成] {final}")
 
     # 3) 翻页转场合并（所有已渲染的幕）
-    finals = [(build / f"{sc['id']}.mp4", sc["duration"]) for sc in timeline["scenes"]]
+    finals = [(build / f"{sc['id']}{vs}.mp4", sc["duration"]) for sc in timeline["scenes"]]
     if not all(f.exists() for f, _ in finals):
         print("[提示] 还有幕未渲染，暂不合并")
         return
     OUT.mkdir(exist_ok=True)
-    out = OUT / f"{ep_dir.name}.mp4"
+    out = OUT / f"{ep_dir.name}{'_竖屏' if a.vertical else ''}.mp4"
     if len(finals) == 1:
         run(["cp", str(finals[0][0]), str(out)])
         print(f"OUTPUT={out}")
