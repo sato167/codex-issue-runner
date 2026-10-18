@@ -582,3 +582,46 @@ class Sketch:
         for u in (-10, 20):
             self.line(P(u, 42), P(u, 76), 3.6, ORANGE)
             self.poly([P(u - 8, 80), P(u, 76), P(u + 16, 82)], 3.4, ORANGE)
+
+    def dice(self, cx, cy, s=40, rot=0.0, color="#ffffff", pips=5):
+        pts = self.rot_rect(cx - s / 2, cy - s / 2, s, s, rot, (cx, cy))
+        self.curve(pts + pts[:2], 4.0)
+        self.fill(pts, color, 9)
+        a = math.radians(rot)
+        spots = {1: [(0, 0)], 2: [(-1, -1), (1, 1)], 3: [(-1, -1), (0, 0), (1, 1)],
+                 4: [(-1, -1), (1, -1), (-1, 1), (1, 1)], 5: [(-1, -1), (1, -1), (0, 0), (-1, 1), (1, 1)]}[pips]
+        for u, v in spots:
+            u, v = u * s * 0.26, v * s * 0.26
+            self.dot(cx + u * math.cos(a) - v * math.sin(a), cy + u * math.sin(a) + v * math.cos(a), 6)
+
+    def chest(self, cx, gy, w=160, h=90, open_=True):
+        box = [(cx - w / 2, gy), (cx - w / 2, gy - h), (cx + w / 2, gy - h), (cx + w / 2, gy)]
+        self.poly(box, 4.2, closed=True)
+        self.fill(box, BROWN)
+        self.line((cx - w / 2, gy - h * 0.45), (cx + w / 2, gy - h * 0.45), 3.4)
+        lock = [(cx - 10, gy - h * 0.6), (cx + 10, gy - h * 0.6), (cx + 10, gy - h * 0.3), (cx - 10, gy - h * 0.3)]
+        self.poly(lock, 3.2, closed=True)
+        self.fill(lock, YEL, 7)
+        if open_:
+            lid = [(cx - w / 2, gy - h), (cx - w / 2 + 14, gy - h - 60), (cx + w / 2 + 14, gy - h - 60), (cx + w / 2, gy - h)]
+            self.poly(lid, 4.0)
+            for k in range(5):
+                self.circle(cx - w * 0.3 + k * w * 0.15, gy - h - 8 - (k % 2) * 10, 12, 3.2)
+                self.fill_ell(cx - w * 0.3 + k * w * 0.15, gy - h - 8 - (k % 2) * 10, 10, 10, YEL)
+            self.rays(cx, gy - h - 10, 70, 100, 7, 200, 340, YEL, 4.0)
+
+    def lyre(self, cx, cy, k=1.0):
+        P = lambda u, v: (cx + u * k, cy + v * k)
+        self.curve([P(-50, 100), P(-70, 10), P(-50, -90), P(-30, -110)], 4.0)
+        self.curve([P(50, 100), P(70, 10), P(50, -90), P(30, -110)], 4.0)
+        self.line(P(-60, -70), P(60, -70), 3.8)
+        base = [P(-60, 92), P(60, 92), P(60, 112), P(-60, 112)]
+        self.poly(base, 3.4, closed=True)
+        self.fill(base, YEL, 8)
+        for u in (-30, -10, 10, 30):
+            self.line(P(u, -68), P(u, 90), 2.2)
+
+    def star_glow(self, cx, cy, r):
+        self.star(cx, cy, r, YEL, 4.6)
+        self.circle(cx, cy, r * 1.5, 3.0, ORANGE)
+        self.rays(cx, cy, r * 1.7, r * 2.1, 12, 0, 360, YEL, 4.0)
