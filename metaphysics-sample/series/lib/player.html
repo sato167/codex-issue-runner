@@ -232,7 +232,11 @@ function frame(t) {
   for (const p of S.sc.phrases) if (t >= p.start - 0.05) cur = p;
   const cap = document.getElementById('cap');
   if (cur) {
-    if (cap.dataset.key !== cur.text) { cap.innerHTML = `<i>${cur.text}</i>`; cap.dataset.key = cur.text; }
+    if (cap.dataset.key !== cur.text) {
+      cap.innerHTML = `<i>${cur.text}</i>`; cap.dataset.key = cur.text;
+      // 竖屏：长句缩小字号，保证最多两行，不压到底部小字
+      if (G.vertical) cap.style.fontSize = (cur.text.length > 28 ? Math.floor(900 / Math.ceil(cur.text.length / 2)) : 60) + 'px';
+    }
     const k = Math.max(0, Math.min(1, (t - cur.start) / (cur.end - cur.start)));
     cap.firstChild.style.backgroundSize = `${(k * 100).toFixed(1)}% 38%`;
     cap.style.opacity = 1;
