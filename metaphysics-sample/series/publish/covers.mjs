@@ -1,5 +1,6 @@
 // 生成封面：合集 4:3，单集竖屏 3:4 + 横屏 4:3。
-// 用法: node covers.mjs <输出目录> <字体css>   （需先跑过各集的 make.py --preview 生成 build/epXX/scenes.json）
+// 用法: node covers.mjs <输出目录> <字体css> [meta.json] [项目目录]
+//   （需先跑过各集的 make.py --preview 生成 <项目>/build/epXX/scenes.json；默认本系列）
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync, mkdirSync, mkdtempSync } from 'node:fs';
@@ -8,10 +9,11 @@ import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const { chromium } = createRequire(execSync('npm root -g').toString().trim() + '/')('playwright');
-const [outDir, fontCss] = process.argv.slice(2);
+const [outDir, fontCss, metaArg, rootArg] = process.argv.slice(2);
 const here = dirname(fileURLToPath(import.meta.url));
-const series = resolve(here, '..');
-const meta = JSON.parse(readFileSync(join(here, 'meta.json'), 'utf8'));
+const series = rootArg ? resolve(rootArg) : resolve(here, '..');
+const meta = JSON.parse(readFileSync(metaArg ? resolve(metaArg) : join(here, 'meta.json'), 'utf8'));
+const BRAND = meta.brand || '白话《形而上学》';
 mkdirSync(outDir, { recursive: true });
 
 const html = readFileSync(join(here, 'cover.html'), 'utf8').replace('FONT_CSS', pathToFileURL(resolve(fontCss)).href);
@@ -58,7 +60,7 @@ for (const e of meta.episodes) {
       L.art[1] = L.hook[1] + 110;
       L.art[3] = 1400 - L.art[1];
     }
-    await shoot({ w: L.w, h: L.h, layout: L, brand: '白话《形而上学》', chip: `第${e.ep}集 · 卷${VOL[e.ep - 1]}`,
+    await shoot({ w: L.w, h: L.h, layout: L, brand: BRAND, chip: e.chip || `第${e.ep}集 · 卷${VOL[e.ep - 1]}`,
                   title, hook: e.hook, corner: '', elements, ids: e.ids },
                 `第${num}集_${kind === 'portrait' ? '竖屏3比4' : '横屏4比3'}.png`);
   }
@@ -73,9 +75,9 @@ for (const e of meta.episodes) {
   L.chip = [76, 340];
   L.hook = [80, 430, 1300];
   L.art = [0, 510, 1440, 570];
-  L.artAlign = 'xMidYMid slice';
-  await shoot({ w: L.w, h: L.h, layout: L, brand: '', chip: '全 14 集 · 一卷一集', title: '白话《形而上学》', hook: c.hook,
-                corner: '', elements: scenesOf(c.elements.ep), ids: c.elements.ids, crop: [0, 110, 1600, 640] },
+  L.artAlign = metaArg ? 'xMidYMid meet' : 'xMidYMid slice';
+  await shoot({ w: L.w, h: L.h, layout: L, brand: '', chip: c.chip || '全 14 集 · 一卷一集', title: c.cover_title || '白话《形而上学》', hook: c.hook,
+                corner: '', elements: scenesOf(c.elements.ep), ids: c.elements.ids, crop: 'crop' in c ? c.crop : (metaArg ? null : [0, 110, 1600, 640]) },
               '合集封面_横屏4比3.png');
 }
 await browser.close();

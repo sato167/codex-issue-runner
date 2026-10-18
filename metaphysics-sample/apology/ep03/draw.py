@@ -251,6 +251,19 @@ def scene6(s):
     s.line((60, 782), (1560, 782), 3.4)
 
 
+def cover_art(s):
+    """只给封面用的画面（不在视频里出现）：苏格拉底对着镜子审视自己。"""
+    s.begin("cover3", (300, 100, 700, 650))
+    mr = s.epts(620, 400, 190, 250, 0, 360, n=36)[:-1]
+    s.fill(mr, "#d7ecff", 18)
+    s.curve(mr + mr[:2], 7.0)
+    s.line((620, 650), (620, 720), 7.0)
+    s.line((540, 720), (700, 720), 6.0)
+    socrates_head(s, 620, 360, 90)
+    s.magnifier(840, 520, 80, 40)
+    s.rays(620, 400, 290, 330, 12, 0, 360, YEL, 4.0)
+
+
 def build(s):
     scene1(s)
     scene2(s)
@@ -258,3 +271,4 @@ def build(s):
     scene3(s)
     scene4(s)
     scene6(s)
+    cover_art(s)
