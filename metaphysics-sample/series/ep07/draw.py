@@ -4,62 +4,6 @@ from sketch import *  # noqa: F401,F403
 BRONZE = "#c98a4b"
 
 
-def dashed(s, pts, c=NAVY, w=3.4, closed=True):
-    seq = list(pts) + ([pts[0]] if closed else [])
-    for a, b in zip(seq, seq[1:]):
-        L = math.hypot(b[0] - a[0], b[1] - a[1])
-        n = max(1, int(L / 28))
-        for k in range(n):
-            t0, t1 = k / n, k / n + 0.55 / n
-            s.line((a[0] + (b[0] - a[0]) * t0, a[1] + (b[1] - a[1]) * t0), (a[0] + (b[0] - a[0]) * t1, a[1] + (b[1] - a[1]) * t1), w, c)
-
-
-def cat(s, cx, cy, color="#ffcf99"):
-    """坐着的猫，cy 为头心。"""
-    body = [(cx - 50, cy + 170), (cx - 60, cy + 110), (cx - 36, cy + 50), (cx + 36, cy + 50), (cx + 60, cy + 110), (cx + 50, cy + 170)]
-    s.curve(body, 4.2)
-    s.line((cx - 50, cy + 170), (cx + 50, cy + 170))
-    s.fill(body, color)
-    s.curve([(cx + 50, cy + 160), (cx + 110, cy + 150), (cx + 120, cy + 90), (cx + 100, cy + 70)], 4.2)
-    for sx in (-1, 1):
-        s.poly([(cx + sx * 48, cy - 20), (cx + sx * 44, cy - 78), (cx + sx * 12, cy - 46)], 4.0, closed=True)
-    head = s.epts(cx, cy, 56, 48, 0, 360, n=24)[:-1]
-    s.curve(head + head[:1])
-    s.fill(head, color)
-    s.eyes(cx, cy - 6, 20)
-    s.poly([(cx - 7, cy + 8), (cx + 7, cy + 8), (cx, cy + 15)], 3.2, closed=True)
-    s.curve([(cx - 12, cy + 24), (cx, cy + 16), (cx + 12, cy + 24)], 3.0)
-    for sx in (-1, 1):
-        for dy in (-4, 8):
-            s.line((cx + sx * 24, cy + 14 + dy * 0.3), (cx + sx * 70, cy + 8 + dy), 2.6)
-    for k in range(3):
-        s.curve([(cx - 20 + k * 20, cy - 46), (cx - 18 + k * 20, cy - 34)], 3.0, ORANGE)
-
-
-def socrates(s, cx, cy):
-    """苏格拉底（Q 版）：大秃头、塌鼻子、短而蓬的胡子。"""
-    r = 56
-    s.circle(cx, cy, r)
-    for sx in (-1, 1):
-        s.curve([(cx + sx * (r - 2), cy - 4), (cx + sx * (r + 10), cy + 8), (cx + sx * (r + 2), cy + 22)], 3.4)
-    s.eyes(cx, cy - 6, 22, (0, 0), big=True)
-    s.ell(cx, cy + 12, 16, 10, 3.6)
-    s.dot(cx - 6, cy + 13, 4)
-    s.dot(cx + 6, cy + 13, 4)
-    beard = [(cx - r + 8, cy + 24), (cx - 48, cy + 64), (cx - 20, cy + 86), (cx, cy + 92), (cx + 20, cy + 86), (cx + 48, cy + 64), (cx + r - 8, cy + 24),
-             (cx + 24, cy + 36), (cx, cy + 34), (cx - 24, cy + 36)]
-    s.curve(beard, 4.0, closed=True)
-    s.fill(beard, "#c9ced8")
-    s.arc(cx, cy + 46, 10, 6, 20, 160, 3.4)
-    top, bot = cy + 86, cy + 300
-    s.curve([(cx - 44, top), (cx - 90, top + 40), (cx - 100, bot)])
-    s.curve([(cx + 44, top), (cx + 90, top + 40), (cx + 100, bot)])
-    s.line((cx - 100, bot), (cx + 100, bot))
-    s.fill([(cx - 44, top), (cx - 90, top + 40), (cx - 100, bot), (cx + 100, bot), (cx + 90, top + 40), (cx + 44, top)], "#f3ead8")
-    for sx in (-1, 1):
-        s.ell(cx + sx * 36, bot + 10, 24, 10, 3.6)
-
-
 def scene1(s):
     s.begin("aristotle", (40, 120, 440, 680))
     with s.scaled(0.72, (210, 440)):
