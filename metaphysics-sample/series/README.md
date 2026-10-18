@@ -1,6 +1,6 @@
 # 白话《形而上学》系列（14 集）
 
-每卷一集，每集约 1–2 分钟。配音默认用 Gemini TTS（`gemini-3.8-flash-tts`，音色 Aoede），按短句分段配音，说到哪画到哪。各集主题见 [outline.md](outline.md)。
+每卷一集，每集 1–2 分钟，全系列约 22 分钟。成片在 `out/ep01.mp4`–`out/ep14.mp4`，用 MiniMax 的 Janey V2 克隆音色配音（`--tts minimax`）。也可以用 Gemini TTS（`gemini-3.8-flash-tts`，音色 Aoede，`make.py` 的默认值）。按短句分段配音，说到哪画到哪。各集主题见 [outline.md](outline.md)。
 
 ## 目录
 
