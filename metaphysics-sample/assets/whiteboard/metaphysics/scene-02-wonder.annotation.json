@@ -5,7 +5,7 @@
     "height": 941
   },
   "storyBasis": "从经验到智慧：追问原因；哲学始于惊奇。",
-  "sceneDurationMs": 20836,
+  "sceneDurationMs": 27632,
   "elements": [
     {
       "id": "stairs",
@@ -23,7 +23,7 @@
       "reveal": {
         "direction": "top_to_bottom",
         "startMs": 400,
-        "durationMs": 6594,
+        "durationMs": 9102,
         "maskPaddingPx": 22,
         "protectedRegions": []
       },
@@ -54,8 +54,8 @@
       },
       "reveal": {
         "direction": "top_to_bottom",
-        "startMs": 7494,
-        "durationMs": 7756,
+        "startMs": 10002,
+        "durationMs": 9282,
         "maskPaddingPx": 22,
         "protectedRegions": []
       },
@@ -86,8 +86,8 @@
       },
       "reveal": {
         "direction": "top_to_bottom",
-        "startMs": 15750,
-        "durationMs": 4036,
+        "startMs": 19784,
+        "durationMs": 6798,
         "maskPaddingPx": 22,
         "protectedRegions": []
       },

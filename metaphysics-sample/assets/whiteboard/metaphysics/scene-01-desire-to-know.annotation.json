@@ -5,7 +5,7 @@
     "height": 941
   },
   "storyBasis": "求知是人的天性；证据是我们天生爱看。",
-  "sceneDurationMs": 25953,
+  "sceneDurationMs": 34040,
   "elements": [
     {
       "id": "aristotle",
@@ -23,7 +23,7 @@
       "reveal": {
         "direction": "top_to_bottom",
         "startMs": 400,
-        "durationMs": 8687,
+        "durationMs": 11838,
         "maskPaddingPx": 22,
         "protectedRegions": []
       },
@@ -54,8 +54,8 @@
       },
       "reveal": {
         "direction": "top_to_bottom",
-        "startMs": 9587,
-        "durationMs": 8687,
+        "startMs": 12738,
+        "durationMs": 10902,
         "maskPaddingPx": 22,
         "protectedRegions": []
       },
@@ -86,8 +86,8 @@
       },
       "reveal": {
         "direction": "top_to_bottom",
-        "startMs": 18774,
-        "durationMs": 6129,
+        "startMs": 24140,
+        "durationMs": 8850,
         "maskPaddingPx": 22,
         "protectedRegions": []
       },

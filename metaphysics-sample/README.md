@@ -11,7 +11,8 @@
 - `tools/clean_hand.py`：去掉参考仓库手部素材笔杆上的原作者标识 → `assets/drawing-hand-clean.png`
 - `tools/make_sample.py`：配音 → 按真实音频时长生成 SRT / annotation.json → 流式笔迹渲染 → 合成音轨 + 字幕 → 合并
 - `assets/whiteboard/metaphysics/`：线稿 PNG、标注、SRT
-- `metaphysics-sample-preview-silent.mp4`：无声预览（时长按语速估算）
+- `metaphysics-sample.mp4`：带 janey 配音的样片（约 62 秒）
+- `metaphysics-sample-preview-silent.mp4`：早期无声预览（时长按语速估算）
 
 ## 生成带配音的正式样片
 

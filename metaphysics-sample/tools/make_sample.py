@@ -68,10 +68,10 @@ def resolve_voice(voices: dict, name: str) -> str:
         for v in voices.get(group) or []:
             if want in (v.get("voice_id", "").lower(), (v.get("voice_name") or "").lower()):
                 return v["voice_id"]
-    for group in ("voice_cloning", "voice_generation", "system_voice"):
-        for v in voices.get(group) or []:
-            if want in v.get("voice_id", "").lower() or want in (v.get("voice_name") or "").lower():
-                return v["voice_id"]
+    fuzzy = [v for group in ("voice_cloning", "voice_generation", "system_voice") for v in voices.get(group) or []
+             if want in v.get("voice_id", "").lower() or want in (v.get("voice_name") or "").lower()]
+    if fuzzy:  # 多个同名克隆音色时取最新创建的
+        return max(fuzzy, key=lambda v: v.get("created_time", ""))["voice_id"]
     print(f"[提示] 音色列表中未找到 “{name}”，直接作为 voice_id 使用", file=sys.stderr)
     return name
 
