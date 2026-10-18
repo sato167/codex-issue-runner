@@ -170,7 +170,52 @@ def scene3(s):
     s.ground(60, 1560, 782)
 
 
+def scene_one_of(s):
+    s.begin("lonely1", (40, 90, 500, 380))
+    one = [(240, 180), (280, 156), (280, 380), (310, 380), (310, 400), (220, 400), (220, 380), (250, 380), (250, 196), (230, 206)]
+    s.poly(one, 4.4, closed=True)
+    s.fill(one, CORAL, 9)
+    ring = s.epts(265, 280, 150, 150, 0, 360, n=36)
+    for i in range(0, len(ring) - 1, 2):
+        s.line(ring[i], ring[i + 1], 3.0, GRAY)
+    s.qmark(450, 180, 0.8)
+
+    s.begin("nope10", (1130, 110, 440, 680))
+    with s.scaled(0.72, (1360, 420)):
+        s.aristotle(1360, 420, wave=True)
+    s.line((1170, 680), (1540, 680), 3.4)
+
+    s.begin("color1", (560, 90, 560, 380))
+    for k, c in enumerate((SKY, YEL, CORAL, GREEN, PINK)):
+        x = 640 + k * 100
+        s.circle(x, 280, 36, 3.6)
+        s.fill_ell(x, 280, 34, 34, c)
+    s.circle(840, 280, 58, 5.0, TEAL)
+    s.arrow((840, 180), (840, 214), TEAL, 4.0, 12)
+
+    s.begin("sound1", (40, 480, 520, 320))
+    for k in range(5):
+        s.line((80, 580 + k * 24), (520, 580 + k * 24), 2.4, GRAY)
+    for k, (x, y) in enumerate(((140, 652), (220, 628), (300, 604), (380, 640), (460, 616))):
+        s.ell(x, y, 13, 9, 3.2, NAVY if k == 2 else GRAY, rot=-20)
+        s.fill_ell(x, y, 12, 8, NAVY if k == 2 else GRAY, rot=-20)
+        s.line((x + 12, y - 2), (x + 12, y - 54), 3.0, NAVY if k == 2 else GRAY)
+    s.circle(306, 590, 46, 4.4, TEAL)
+
+    s.begin("man1", (560, 480, 560, 320))
+    for k in range(5):
+        x = 640 + k * 100
+        if k == 2:
+            s.person(x, 620, 28, hair="bun", mouth="grin", hands=((-40, 50), (40, 50)), body_h=70, shirt=CORAL, legs=False)
+        else:
+            s.circle(x, 620, 26, 3.0, GRAY)
+            s.curve([(x - 26, 720), (x - 22, 660), (x + 22, 660), (x + 26, 720)], 3.0, GRAY)
+    s.circle(840, 660, 84, 4.4, TEAL)
+    s.line((580, 762), (1100, 762), 3.4)
+
+
 def build(s):
     scene1(s)
     scene2(s)
+    scene_one_of(s)
     scene3(s)

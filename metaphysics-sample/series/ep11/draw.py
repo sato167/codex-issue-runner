@@ -148,7 +148,52 @@ def scene3(s):
     s.line((894, 780), (966, 780), 4.0)
 
 
+def scene_ends(s):
+    s.begin("chaos", (40, 90, 500, 380))
+    rnd = random.Random(8)
+    for k in range(7):
+        a = (rnd.uniform(80, 460), rnd.uniform(140, 420))
+        b = (rnd.uniform(80, 460), rnd.uniform(140, 420))
+        s.arrow(a, b, (CORAL, SKY, ORANGE, TEAL, GRAY, PINK, NAVY)[k], 3.4, 12)
+    s.cross(270, 280, 3.0, CORAL, 9.0)
+
+    s.begin("ends", (560, 90, 1010, 260))
+    s.line((680, 220), (1440, 220), 4.6)
+    for x, c in ((640, SKY), (1480, CORAL)):
+        s.circle(x, 220, 34, 4.2)
+        s.fill_ell(x, 220, 32, 32, c)
+    s.arrow((900, 220), (1180, 220), NAVY, 5.0, 20)
+
+    s.begin("changes", (560, 360, 1010, 440))
+    snow = lambda cx, cy, r: [s.line((cx - r * math.cos(math.radians(a)), cy - r * math.sin(math.radians(a))),
+                                     (cx + r * math.cos(math.radians(a)), cy + r * math.sin(math.radians(a))), 4.0, SKY) for a in (0, 60, 120)]
+    snow(620, 580, 36)
+    s.arrow((670, 580), (730, 580), ORANGE, 4.0, 12)
+    s.sun(800, 580, 30, ORANGE, 8)
+    for x0, c in ((930, None), (1070, "#22304a")):
+        sq = [(x0, 540), (x0 + 80, 540), (x0 + 80, 620), (x0, 620)]
+        s.poly(sq, 4.2, closed=True)
+        if c:
+            s.fill(sq, c, 10)
+    s.arrow((1018, 580), (1062, 580), ORANGE, 4.0, 12)
+    s.sprout(1250, 640, 80)
+    s.arrow((1290, 590), (1350, 590), ORANGE, 4.0, 12)
+    s.tree(1450, 660, 220, GREEN)
+    s.line((580, 662), (1560, 662), 3.4)
+
+    s.begin("rocksong", (40, 480, 500, 320))
+    rk = [(100, 740), (120, 660), (180, 620), (260, 640), (290, 720), (270, 750)]
+    s.curve(rk, 4.2, closed=True)
+    s.fill(rk, GRAY)
+    s.arrow((310, 690), (370, 690), GRAY, 4.0, 12)
+    with s.scaled(1.8, (440, 700)):
+        s.note(420, 720, CORAL)
+        s.note(466, 700, SKY)
+    s.cross(450, 660, 1.8)
+
+
 def build(s):
     scene1(s)
     scene2(s)
+    scene_ends(s)
     scene3(s)

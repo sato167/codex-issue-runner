@@ -125,7 +125,60 @@ def scene3(s):
     s.rays(1200, 680, 210, 236, 8, 200, 340, YEL, 3.4)
 
 
+def scene_doubled(s):
+    s.begin("socq", (40, 90, 460, 700))
+    with s.scaled(0.8, (230, 380)):
+        socrates(s, 230, 380)
+    s.qmark(400, 180, 0.7)
+    sh = [(340, 270), (400, 270), (400, 320), (370, 350), (340, 320)]
+    s.poly(sh, 3.8, closed=True)
+    s.fill(sh, SKY, 8)
+    s.line((450, 260), (450, 340), 3.4)
+    s.line((420, 280), (480, 280), 3.4)
+    for x in (420, 480):
+        pan = s.epts(x, 300, 16, 6, 0, 180, n=6)
+        s.curve(pan + [pan[0]], 3.0)
+    s.line((70, 672), (420, 672), 3.4)
+
+    s.begin("nosep", (520, 90, 560, 380))
+    cl = s.cloud(800, 260, 200, 100, 10)
+    s.curve(cl + cl[:2], 4.0)
+    s.circle(740, 260, 34, 3.6)
+    s.poly([(830, 290), (890, 290), (860, 230)], 3.6, closed=True)
+    s.cross(800, 260, 2.6)
+
+    s.begin("scissors", (520, 480, 560, 320))
+    for k, (x, c) in enumerate(((590, CORAL), (670, SKY))):
+        cupp = [(x - 26, 700), (x + 26, 700), (x + 20, 760), (x - 20, 760)]
+        s.poly(cupp, 3.6, closed=True)
+        s.fill(cupp, c, 8)
+    s.line((550, 762), (720, 762), 3.4)
+    cs = s.epts(1000, 540, 40, 40, 0, 360, n=16)
+    for i in range(0, len(cs) - 1, 2):
+        s.line(cs[i], cs[i + 1], 3.2, GRAY)
+    dashed(s, [(680, 690), (960, 560)], GRAY, 3.0, closed=False)
+    with s.scaled(2.2, (820, 640)):
+        for sx in (-1, 1):
+            s.circle(820 + sx * 16, 660, 13, 3.6)
+            s.line((820 + sx * 10, 648), (812 - sx * 26, 590), 4.4)
+        s.fill_ell(804, 660, 11, 11, ORANGE)
+        s.fill_ell(836, 660, 11, 11, ORANGE)
+    s.rays(820, 620, 30, 50, 4, 200, 340, CORAL, 3.4)
+
+    s.begin("double", (1100, 90, 470, 700))
+    s.person(1220, 300, 38, hair="spike", mouth="o", hands=((-50, 100), (60, 110)), body_h=120, shirt=YEL)
+    s.sweat(1268, 270)
+    for k in range(3):
+        apple(s, 1170 + k * 50, 560, 20)
+    s.arrow((1310, 560), (1370, 560), ORANGE, 4.0, 12)
+    for k in range(6):
+        apple(s, 1400 + (k % 3) * 50, 540 + (k // 3) * 50, 20)
+    s.qmark(1480, 420, 0.7)
+    s.line((1120, 640), (1560, 640), 3.4)
+
+
 def build(s):
     scene1(s)
     scene2(s)
+    scene_doubled(s)
     scene3(s)
