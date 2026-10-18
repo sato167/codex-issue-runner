@@ -2,3 +2,5 @@ assets/whiteboard/metaphysics/*-whiteboard.mp4
 assets/whiteboard/metaphysics/*-final.mp4
 assets/whiteboard/metaphysics/concat.txt
 assets/whiteboard/metaphysics/audio/
+__pycache__/
+metaphysics-v2-partial.mp4
