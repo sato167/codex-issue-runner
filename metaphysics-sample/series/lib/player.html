@@ -54,8 +54,8 @@
 <div class="chip" id="chip"></div>
 <div id="cap"></div>
 <div id="preload"></div>
-<div id="vhead"><div class="brand">白话《形而上学》</div><div class="ep" id="vep"></div><div class="vscene" id="vscene"></div><div class="vtitle"><span id="vtitle"></span></div></div>
-<div id="vfoot">一卷一集 · 跟着笔尖读完亚里士多德</div>
+<div id="vhead"><div class="brand" id="vbrand"></div><div class="ep" id="vep"></div><div class="vscene" id="vscene"></div><div class="vtitle"><span id="vtitle"></span></div></div>
+<div id="vfoot"></div>
 <script>
 const NS = 'http://www.w3.org/2000/svg';
 const W = 1600, H = 900;   // 线稿坐标系
@@ -91,6 +91,8 @@ function init(data, timeline) {
     const parts = TL.subtitle.split(' · ');
     document.getElementById('vep').textContent = parts[0] + ' · ' + parts[1];
     document.getElementById('vtitle').textContent = parts.slice(2).join(' · ');
+    document.getElementById('vbrand').textContent = TL.title;
+    document.getElementById('vfoot').textContent = TL.footer || '一卷一集 · 跟着笔尖读完亚里士多德';
     const stage = document.getElementById('stage');
     Object.assign(stage.style, { inset: 'auto', left: G.SX + 'px', top: G.SY + 'px' });
     stage.setAttribute('width', G.SW); stage.setAttribute('height', G.SH);

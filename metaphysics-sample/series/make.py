@@ -151,7 +151,7 @@ def main() -> None:
             tts = MiniMaxTTS(a.voice or "janey", a.model or "speech-2.6-hd")
 
     # 1) 逐短句配音 + 时间轴
-    timeline = {"title": script["title"], "subtitle": script["subtitle"], "scenes": [],
+    timeline = {"title": script["title"], "subtitle": script["subtitle"], "scenes": [], "footer": script.get("footer"),
                 "layout": "vertical" if a.vertical else "landscape"}
     vs = "-v" if a.vertical else ""   # 竖屏版的中间文件后缀
     texts_path = audio / "texts.json"
