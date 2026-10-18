@@ -162,6 +162,17 @@ class Sketch:
     def ground(self, x0, x1, y):
         self.curve([(x0 + (x1 - x0) * i / 6, y + self.j(3)) for i in range(7)], 3.4)
 
+    def swallow(self, x, y, k=1.0):
+        """俯视的燕子：剪刀尾 + 两片后掠的翅膀，头朝右。"""
+        P = lambda pts: [(x + u * k, y + v * k) for u, v in pts]
+        body = P([(22, 0), (10, -7), (-14, -5), (-44, -18), (-30, 0), (-44, 18), (-14, 5), (10, 7)])
+        up = P([(6, -5), (-8, -30), (-34, -52), (-20, -22), (-6, -5)])
+        dn = P([(6, 5), (-8, 30), (-34, 52), (-20, 22), (-6, 5)])
+        for sh in (up, dn, body):
+            self.curve(sh, 3.2, closed=True)
+            self.fill(sh, NAVY, 8)
+        self.dot(x + 12 * k, y - 1 * k, 3)
+
     def eyes(self, cx, cy, gap, look=(0, 0), big=False):
         for sx in (-1, 1):
             ex = cx + sx * gap
@@ -501,9 +512,7 @@ def scene4(s: Sketch):
     s.dot(210, 213, 12)
     s.poly([(280, 214), (318, 214)], 3.2, ORANGE)
     s.poly([(306, 204), (320, 214), (306, 224)], 3.2, ORANGE)
-    sw = [(350, 214), (380, 200), (410, 204), (432, 190), (420, 214), (440, 236), (408, 224), (380, 230)]
-    s.curve(sw, 3.4, closed=True)
-    s.fill(sw, NAVY, 8)
+    s.swallow(380, 212, 0.75)
     for x, y in ((400, 268), (430, 282), (370, 284)):
         drop = [(x, y - 12), (x + 7, y + 2), (x, y + 8), (x - 7, y + 2)]
         s.curve(drop, 3.0, closed=True)
@@ -533,11 +542,8 @@ def scene4(s: Sketch):
     for x in (300, 420, 540):
         s.grass(x, 762)
     for (x, y, k) in ((400, 690, 1.0), (500, 660, 0.8)):
-        sw = [(x - 44 * k, y), (x - 10 * k, y - 10 * k), (x + 10 * k, y - 34 * k), (x + 18 * k, y - 8 * k),
-              (x + 44 * k, y + 2 * k), (x + 14 * k, y + 6 * k), (x + 30 * k, y + 26 * k), (x - 4 * k, y + 8 * k)]
-        s.curve(sw, 3.4, closed=True)
-        s.fill(sw, NAVY, 8)
-        s.curve([(x + 44 * k + 10, y - 2), (x + 90 * k, y - 4)], 2.6, GRAY)
+        s.swallow(x, y, k)
+        s.curve([(x - 50 * k, y - 2), (x - 96 * k, y + 2)], 2.6, GRAY)
     rc = s.cloud(470, 430, 90, 44, 8)
     s.curve(rc + rc[:2], 4.2)
     s.fill(rc, GRAY)

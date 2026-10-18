@@ -74,7 +74,6 @@ def main() -> None:
     # 2) 逐幕渲染 + 合成音轨
     pick = [int(x) - 1 for x in a.scenes.split(",")] if a.scenes else range(len(timeline["scenes"]))
     css = font_css()
-    finals = []
     for idx in pick:
         sc = timeline["scenes"][idx]
         silent, final = BUILD / f"{sc['id']}-silent.mp4", BUILD / f"{sc['id']}.mp4"
@@ -90,11 +89,12 @@ def main() -> None:
         subprocess.run(["ffmpeg", "-y", "-loglevel", "error", *inputs, "-filter_complex", ";".join(filt),
                         "-map", "0:v", "-map", "[aout]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
                         "-ar", "44100", "-t", str(sc["duration"]), str(final)], check=True)
-        finals.append((final, sc["duration"]))
         print(f"[完成] {final}")
+    finals = [(BUILD / f"{sc['id']}.mp4", sc["duration"]) for sc in timeline["scenes"]
+              if (BUILD / f"{sc['id']}.mp4").exists()]
 
     # 3) 翻页转场合并
-    out = HERE.parent / ("metaphysics-v2.mp4" if not a.scenes else "metaphysics-v2-partial.mp4")
+    out = HERE.parent / ("metaphysics-v2.mp4" if len(finals) == len(timeline["scenes"]) else "metaphysics-v2-partial.mp4")
     if len(finals) == 1:
         subprocess.run(["cp", str(finals[0][0]), str(out)], check=True)
     else:
