@@ -1,0 +1,107 @@
+{
+  "sceneId": "scene-01",
+  "canvas": {
+    "width": 1672,
+    "height": 941
+  },
+  "storyBasis": "求知是人的天性；证据是我们天生爱看。",
+  "sceneDurationMs": 25953,
+  "elements": [
+    {
+      "id": "aristotle",
+      "label": "亚里士多德持卷",
+      "sequence": 1,
+      "narrativeRole": "人物与论点登场",
+      "subtitle": "两千多年前，亚里士多德在《形而上学》的开头，写下了一句话：求知，是人的天性。",
+      "type": "character",
+      "region": {
+        "x": 70,
+        "y": 170,
+        "width": 490,
+        "height": 690
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 400,
+        "durationMs": 8687,
+        "maskPaddingPx": 22,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          315,
+          180
+        ],
+        "end": [
+          315,
+          850
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "eye",
+      "label": "爱看的眼睛与万物",
+      "sequence": 2,
+      "narrativeRole": "给出证据：人天生爱看",
+      "subtitle": "证据就在我们身边。哪怕没什么用处，我们也喜欢看、喜欢听，尤其喜欢用眼睛去看。",
+      "type": "concept",
+      "region": {
+        "x": 600,
+        "y": 180,
+        "width": 510,
+        "height": 650
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 9587,
+        "durationMs": 8687,
+        "maskPaddingPx": 22,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          855,
+          190
+        ],
+        "end": [
+          855,
+          820
+        ],
+        "easing": "easeInOut"
+      }
+    },
+    {
+      "id": "shapes",
+      "label": "孩子分辨形状",
+      "sequence": 3,
+      "narrativeRole": "解释原因：看能分辨差别",
+      "subtitle": "因为在所有感觉里，看，最能让我们分辨出万物之间的差别。",
+      "type": "character",
+      "region": {
+        "x": 1150,
+        "y": 170,
+        "width": 480,
+        "height": 640
+      },
+      "reveal": {
+        "direction": "top_to_bottom",
+        "startMs": 18774,
+        "durationMs": 6129,
+        "maskPaddingPx": 22,
+        "protectedRegions": []
+      },
+      "handPath": {
+        "start": [
+          1390,
+          180
+        ],
+        "end": [
+          1390,
+          800
+        ],
+        "easing": "easeInOut"
+      }
+    }
+  ]
+}
