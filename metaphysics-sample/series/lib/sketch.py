@@ -707,3 +707,14 @@ def digit(s, ch, x, y, h=60, c=INK, w=5.0):
         s.ell(x + W / 2, y + h * 0.72, W * 0.48, h * 0.28, w, c)
     else:
         s.curve([(x + u * W, y + v * h) for u, v in P], w, c) if ch in "2369" else s.poly([(x + u * W, y + v * h) for u, v in P], w, c)
+
+
+def apple(s, x, y, r=40, color=CORAL):
+    ap = [(x, y - r * 0.8), (x - r * 0.6, y - r), (x - r * 1.1, y - r * 0.5), (x - r * 1.1, y + r * 0.2), (x - r * 0.7, y + r * 0.8),
+          (x, y + r), (x + r * 0.7, y + r * 0.8), (x + r * 1.1, y + r * 0.2), (x + r * 1.1, y - r * 0.5), (x + r * 0.6, y - r)]
+    s.curve(ap, 4.0, closed=True)
+    s.fill(ap, color)
+    s.line((x, y - r * 0.8), (x + 4, y - r * 1.3), 3.4)
+    leaf = [(x + 4, y - r * 1.2), (x + r * 0.6, y - r * 1.6), (x + r, y - r * 1.4), (x + r * 0.4, y - r * 1.1)]
+    s.curve(leaf, 3.0, closed=True)
+    s.fill(leaf, "#3fae63", 7)

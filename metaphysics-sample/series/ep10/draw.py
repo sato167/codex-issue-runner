@@ -26,17 +26,6 @@ def balance(s, cx, base_y, left=None, right=None, tilt=0):
             item(x, y + 90)
 
 
-def apple(s, x, y, r=40, color=CORAL):
-    ap = [(x, y - r * 0.8), (x - r * 0.6, y - r), (x - r * 1.1, y - r * 0.5), (x - r * 1.1, y + r * 0.2), (x - r * 0.7, y + r * 0.8),
-          (x, y + r), (x + r * 0.7, y + r * 0.8), (x + r * 1.1, y + r * 0.2), (x + r * 1.1, y - r * 0.5), (x + r * 0.6, y - r)]
-    s.curve(ap, 4.0, closed=True)
-    s.fill(ap, color)
-    s.line((x, y - r * 0.8), (x + 4, y - r * 1.3), 3.4)
-    leaf = [(x + 4, y - r * 1.2), (x + r * 0.6, y - r * 1.6), (x + r, y - r * 1.4), (x + r * 0.4, y - r * 1.1)]
-    s.curve(leaf, 3.0, closed=True)
-    s.fill(leaf, "#3fae63", 7)
-
-
 def snowflake(s, cx, cy, r, c=SKY):
     for a in (0, 60, 120):
         t = math.radians(a)
