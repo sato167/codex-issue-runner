@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>封面</title>
+<link rel="stylesheet" href="FONT_CSS">
+<style>
+  html, body { margin: 0; overflow: hidden; background: #fbfaf6; }
+  #page { position: relative; overflow: hidden; font-family: 'LXGW WenKai', sans-serif; color: #22304a;
+          background-color: #fbfaf6;
+          background-image: linear-gradient(#dde7f2 1.6px, transparent 1.6px), linear-gradient(90deg, #dde7f2 1.6px, transparent 1.6px);
+          background-size: 48px 48px; }
+  .brand { position: absolute; font-weight: 700; letter-spacing: 2px; }
+  .chip { position: absolute; font-weight: 700; background: #fff; border: 4px solid #22304a; border-radius: 40px; box-shadow: 6px 6px 0 #ffd23f; }
+  .title { position: absolute; font-weight: 700; line-height: 1.12; letter-spacing: 2px; }
+  .title span { background: linear-gradient(transparent 62%, rgba(255, 210, 63, .85) 62%); padding: 0 6px; }
+  .hook { position: absolute; font-weight: 700; color: #ff6b5b; }
+  #art { position: absolute; }
+  .corner { position: absolute; font-weight: 700; color: #3d5a80; opacity: .75; }
+</style>
+</head>
+<body>
+<div id="page">
+  <div class="brand" id="brand"></div>
+  <div class="chip" id="chip"></div>
+  <div class="title" id="title"></div>
+  <div class="hook" id="hook"></div>
+  <svg id="art"><g id="fills" opacity="0.9"></g><g id="strokes"></g><defs id="clips"></defs></svg>
+  <div class="corner" id="corner"></div>
+</div>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+
+// spec: {w, h, brand, chip, title, hook, corner, elements:{...}, ids:[...], layout:{...}}
+async function render(spec) {
+  const page = document.getElementById('page');
+  page.style.width = spec.w + 'px';
+  page.style.height = spec.h + 'px';
+  const L = spec.layout;
+  const set = (id, text, box, size) => {
+    const el = document.getElementById(id);
+    el.textContent = text || '';
+    el.style.display = text ? '' : 'none';
+    Object.assign(el.style, { left: box[0] + 'px', top: box[1] + 'px', fontSize: size + 'px' });
+    if (box[2]) el.style.width = box[2] + 'px';
+  };
+  set('brand', spec.brand, L.brand, L.brandSize);
+  set('chip', spec.chip, L.chip, L.chipSize);
+  document.getElementById('chip').style.padding = `${L.chipSize * 0.18}px ${L.chipSize * 0.7}px`;
+  const t = document.getElementById('title');
+  t.innerHTML = spec.title.split('\n').map(s => `<span>${s}</span>`).join('<br>');
+  Object.assign(t.style, { left: L.title[0] + 'px', top: L.title[1] + 'px', width: L.title[2] + 'px', fontSize: L.titleSize + 'px' });
+  set('hook', spec.hook, L.hook, L.hookSize);
+  set('corner', spec.corner, L.corner, L.cornerSize);
+
+  // 插画：把选中元素的笔画全部画完，缩放进插画框
+  const svg = document.getElementById('art');
+  const [ax, ay, aw, ah] = L.art;
+  Object.assign(svg.style, { left: ax + 'px', top: ay + 'px' });
+  svg.setAttribute('width', aw); svg.setAttribute('height', ah);
+  const fills = document.getElementById('fills'), strokes = document.getElementById('strokes'), clips = document.getElementById('clips');
+  let n = 0;
+  for (const id of spec.ids) {
+    for (const it of spec.elements[id].items) {
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', it.d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', it.c);
+      p.setAttribute('stroke-width', it.w);
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('stroke-linejoin', 'round');
+      if (it.t === 'f') {
+        const cp = document.createElementNS(NS, 'clipPath');
+        cp.id = 'c' + n++;
+        const cpp = document.createElementNS(NS, 'path');
+        cpp.setAttribute('d', it.clip);
+        cp.appendChild(cpp); clips.appendChild(cp);
+        p.setAttribute('clip-path', `url(#${cp.id})`);
+        fills.appendChild(p);
+      } else strokes.appendChild(p);
+    }
+  }
+  const bb = strokes.getBBox();
+  const pad = 24;
+  let bx = bb.x - pad, by = bb.y - pad, bw = bb.width + pad * 2, bh = bb.height + pad * 2;
+  if (spec.crop) [bx, by, bw, bh] = spec.crop;
+  svg.setAttribute('viewBox', `${bx} ${by} ${bw} ${bh}`);
+  svg.setAttribute('preserveAspectRatio', L.artAlign || 'xMidYMid meet');
+  await document.fonts.ready;
+  return true;
+}
+</script>
+</body>
+</html>
