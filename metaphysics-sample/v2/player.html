@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>白话形而上学 · 回放器</title>
+<link rel="stylesheet" href="FONT_CSS">
+<style>
+  html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: #fbfaf6; }
+  #stage { position: absolute; inset: 0; }
+  #hand { position: absolute; inset: 0; pointer-events: none; }
+  .badge { position: absolute; left: 26px; top: 20px; background: rgba(251,250,246,.9); padding: 6px 14px 8px; border-radius: 12px; font-family: 'LXGW WenKai', sans-serif; color: #22304a; }
+  .badge b { display: block; font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+  .badge span { font-size: 17px; opacity: .7; }
+  .chip { position: absolute; right: 34px; top: 30px; font: 700 24px 'LXGW WenKai', sans-serif; color: #22304a;
+          background: #fff; border: 3px solid #22304a; border-radius: 22px; padding: 4px 18px; box-shadow: 4px 4px 0 #ffd23f; }
+  #cap { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); max-width: 1400px; white-space: nowrap;
+         font: 700 42px 'LXGW WenKai', sans-serif; color: #22304a; padding: 6px 26px 10px; border-radius: 14px;
+         background: rgba(255,255,255,.88); box-shadow: 0 2px 0 rgba(34,48,74,.12); }
+  #cap i { font-style: normal; background-repeat: no-repeat; background-position: 0 88%; background-size: 0% 38%;
+           background-image: linear-gradient(#ffd23f, #ffd23f); }
+  #preload { position: absolute; opacity: 0; font: 700 20px 'LXGW WenKai'; }
+</style>
+</head>
+<body>
+<svg id="stage" width="1600" height="900" viewBox="0 0 1600 900">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#dde7f2" stroke-width="1.6"/>
+    </pattern>
+    <g id="clips"></g>
+  </defs>
+  <rect x="-2000" y="-2000" width="5600" height="4900" fill="#fbfaf6"/>
+  <rect x="-2000" y="-2000" width="5600" height="4900" fill="url(#grid)"/>
+  <g id="fills" opacity="0.88"></g>
+  <g id="strokes"></g>
+</svg>
+<svg id="hand" width="1600" height="900"><g id="handg"></g></svg>
+<div class="badge"><b id="title"></b><span id="subtitle"></span></div>
+<div class="chip" id="chip"></div>
+<div id="cap"></div>
+<div id="preload"></div>
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const W = 1600, H = 900;
+let DATA, TL, S;   // 线稿数据、时间轴、当前场景状态
+
+const ease = t => t < 0 ? 0 : t > 1 ? 1 : t * t * (3 - 2 * t);
+const lerp = (a, b, t) => a + (b - a) * t;
+
+// —— 手 + 马克笔（笔尖在原点，手从右下方伸入）——
+function buildHand() {
+  const g = document.getElementById('handg');
+  g.innerHTML = `
+    <g transform="rotate(-8)">
+      <path d="M150 210 L520 620 L640 520 L250 120 Z" fill="#3d5a80" stroke="#22304a" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M150 210 L250 120 L282 150 L180 240 Z" fill="#2ec4b6" stroke="#22304a" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M0 0 L26 8 L150 140 L130 162 L8 28 Z" fill="#ff6b5b" stroke="#22304a" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M0 0 L26 8 L8 28 Z" fill="#22304a"/>
+      <path d="M118 128 C150 92 210 96 250 132 C292 170 296 228 260 262 C226 294 170 290 136 254 C108 224 98 160 118 128 Z"
+            fill="#ffd9bf" stroke="#22304a" stroke-width="4"/>
+      <path d="M126 140 C104 120 70 92 58 76 C50 64 66 52 80 62 C100 78 132 104 150 118" fill="#ffd9bf" stroke="#22304a" stroke-width="4" stroke-linecap="round"/>
+      <path d="M118 176 C96 172 70 176 64 160 C60 146 80 138 100 142 C120 146 136 150 146 156" fill="#ffd9bf" stroke="#22304a" stroke-width="4" stroke-linecap="round"/>
+      <path d="M160 254 C170 230 196 222 214 232" fill="none" stroke="#22304a" stroke-width="3.4" stroke-linecap="round"/>
+    </g>`;
+}
+
+function init(data, timeline) {
+  DATA = data; TL = timeline;
+  document.getElementById('title').textContent = TL.title;
+  document.getElementById('subtitle').textContent = TL.subtitle;
+  document.getElementById('preload').textContent = TL.scenes.map(s => s.name + s.phrases.map(p => p.text).join('')).join('') + '①②③④⑤';
+  buildHand();
+  return document.fonts.ready.then(() => true);
+}
+
+function fitBox([x, y, w, h]) {
+  const pad = 50;
+  x -= pad; y -= pad + 50; w += pad * 2; h += pad * 2 + 140;   // 顶部给标题、底部给字幕让位
+  if (w / h < W / H) { const nw = h * W / H; x -= (nw - w) / 2; w = nw; } else { const nh = w * H / W; y -= (nh - h) / 2; h = nh; }
+  if (w < 980) { const k = 980 / w; x -= (980 - w) / 2; y -= (h * k - h) / 2; h *= k; w = 980; }
+  if (w > W) { x = 0; y = 0; w = W; h = H; }
+  x = Math.max(0, Math.min(W - w, x)); y = Math.max(0, Math.min(H - h, y));
+  return [x, y, w, h];
+}
+
+function setup(sceneIndex) {
+  const sc = TL.scenes[sceneIndex];
+  document.getElementById('chip').textContent = '①②③④⑤'[sceneIndex] + ' ' + sc.name;
+  const fills = document.getElementById('fills'), strokes = document.getElementById('strokes'), clips = document.getElementById('clips');
+  fills.innerHTML = strokes.innerHTML = clips.innerHTML = '';
+  const els = [];
+  let clipN = 0;
+  sc.phrases.forEach((ph, pi) => {
+    const el = DATA.elements[ph.el];
+    const next = sc.phrases[pi + 1];
+    const t0 = ph.start, t1 = next ? next.start : ph.end + 0.5;
+    const items = el.items.map(it => {
+      const p = document.createElementNS(NS, 'path');
+      p.setAttribute('d', it.d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke', it.c);
+      p.setAttribute('stroke-width', it.w);
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('stroke-linejoin', 'round');
+      if (it.t === 'f') {
+        const cp = document.createElementNS(NS, 'clipPath');
+        cp.id = 'c' + (clipN++);
+        const cpp = document.createElementNS(NS, 'path');
+        cpp.setAttribute('d', it.clip);
+        cp.appendChild(cpp); clips.appendChild(cp);
+        p.setAttribute('clip-path', `url(#${cp.id})`);
+        fills.appendChild(p);
+      } else strokes.appendChild(p);
+      const L = p.getTotalLength();
+      p.style.strokeDasharray = `${L + 2} ${L + 2}`;
+      p.style.strokeDashoffset = L + 2;
+      return { p, L, fill: it.t === 'f', shown: 0, a: p.getPointAtLength(0), b: p.getPointAtLength(L) };
+    });
+    // 时间分配：落笔按长度，涂色按长度×0.22，抬笔移动按距离×0.35
+    const segs = []; let prev = els.length ? els[els.length - 1].last : null, total = 0;
+    for (const it of items) {
+      if (prev) { const d = Math.hypot(it.a.x - prev.x, it.a.y - prev.y); segs.push({ kind: 'move', from: prev, to: it.a, w: d * 0.35 + 8 }); total += d * 0.35 + 8; }
+      const w = it.fill ? it.L * 0.22 : it.L;
+      segs.push({ kind: 'draw', it, w }); total += w; prev = it.b;
+    }
+    const span = Math.max(0.6, (t1 - t0) * 0.9);
+    let acc = t0;
+    for (const s of segs) { s.t0 = acc; acc += s.w / total * span; s.t1 = acc; }
+    els.push({ ph, segs, t0, t1: acc, last: prev, box: fitBox(el.focus) });
+  });
+  const endDraw = els[els.length - 1].t1;
+  S = { sc, els, endDraw, duration: sc.duration };
+  return sc.duration;
+}
+
+function cameraAt(t) {
+  const { els, endDraw } = S;
+  const full = [0, 0, W, H];
+  let vb = els[0].box;
+  for (let i = 1; i < els.length; i++) {
+    const k = ease((t - (els[i].t0 - 0.35)) / 0.7);
+    if (k <= 0) break;
+    vb = vb.map((v, j) => lerp(v, els[i].box[j], k));
+  }
+  const kz = ease((t - endDraw - 0.15) / 1.0);
+  return vb.map((v, j) => lerp(v, full[j], kz));
+}
+
+function frame(t) {
+  let pen = null, lifted = false;
+  for (const el of S.els) for (const s of el.segs) {
+    if (s.kind === 'draw') {
+      const k = t <= s.t0 ? 0 : t >= s.t1 ? 1 : (t - s.t0) / (s.t1 - s.t0);
+      if (k !== s.it.shown) { s.it.p.style.strokeDashoffset = (s.it.L + 2) * (1 - k); s.it.shown = k; }
+      if (t >= s.t0 && t < s.t1) pen = s.it.p.getPointAtLength(s.it.L * k);
+    } else if (t >= s.t0 && t < s.t1) {
+      const k = ease((t - s.t0) / (s.t1 - s.t0));
+      pen = { x: lerp(s.from.x, s.to.x, k), y: lerp(s.from.y, s.to.y, k) }; lifted = true;
+    }
+  }
+  const vb = cameraAt(t);
+  document.getElementById('stage').setAttribute('viewBox', vb.map(v => v.toFixed(2)).join(' '));
+  // 手：作画时跟随笔尖；两句之间停在最后一笔；画完后退出画面
+  const sc = W / vb[2];
+  let hx, hy;
+  if (pen) { hx = (pen.x - vb[0]) * sc; hy = (pen.y - vb[1]) * sc; S.lastPen = pen; }
+  else {
+    const first = S.els[0].segs[0];
+    if (t < first.t0) { const k = ease((t - first.t0 + 0.6) / 0.6); const a = first.it.a; hx = lerp(1750, (a.x - vb[0]) * sc, k); hy = lerp(1050, (a.y - vb[1]) * sc, k); }
+    else {
+      const lp = S.lastPen || S.els[0].last;
+      hx = (lp.x - vb[0]) * sc; hy = (lp.y - vb[1]) * sc;
+      const k = ease((t - S.endDraw - 0.1) / 0.6);
+      hx = lerp(hx, 1750, k); hy = lerp(hy, 1050, k);
+    }
+  }
+  const wob = Math.sin(t * 9) * 1.6, lift = lifted ? -10 : 0;
+  document.getElementById('handg').setAttribute('transform', `translate(${hx.toFixed(1)},${(hy + lift).toFixed(1)}) rotate(${wob.toFixed(2)})`);
+  // 字幕：当前短句，荧光笔随语音推进
+  let cur = null;
+  for (const p of S.sc.phrases) if (t >= p.start - 0.05) cur = p;
+  const cap = document.getElementById('cap');
+  if (cur) {
+    if (cap.dataset.key !== cur.text) { cap.innerHTML = `<i>${cur.text}</i>`; cap.dataset.key = cur.text; }
+    const k = Math.max(0, Math.min(1, (t - cur.start) / (cur.end - cur.start)));
+    cap.firstChild.style.backgroundSize = `${(k * 100).toFixed(1)}% 38%`;
+    cap.style.opacity = 1;
+  } else cap.style.opacity = 0;
+  return true;
+}
+</script>
+</body>
+</html>
