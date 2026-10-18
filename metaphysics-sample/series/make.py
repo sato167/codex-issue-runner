@@ -29,7 +29,6 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 LIB = HERE / "lib"
 CACHE = HERE / ".cache"
-OUT = HERE / "out"
 LEAD, TAIL, XFADE = 0.6, 1.6, 0.6
 SOFT_GAP, HARD_GAP = 0.18, 0.42      # 逗号类停顿 / 句末停顿
 PREVIEW_CPS = 4.0                    # 预览模式估算语速（字/秒）
@@ -122,6 +121,7 @@ def load_draw(ep_dir: Path, out_json: Path) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--ep", type=int, required=True)
+    ap.add_argument("--root", default=str(HERE), help="项目目录（含 epXX/），默认本系列；如 ../apology")
     ap.add_argument("--tts", default="gemini", choices=["gemini", "minimax"])
     ap.add_argument("--voice", default=None, help="默认 gemini=Aoede，minimax=janey")
     ap.add_argument("--model", default=None, help="默认 gemini-3.8-flash-tts / speech-2.6-hd")
@@ -131,9 +131,11 @@ def main() -> None:
     ap.add_argument("--vertical", action="store_true", help="出 9:16 竖屏版 → out/epXX_竖屏.mp4")
     a = ap.parse_args()
 
-    ep_dir = HERE / f"ep{a.ep:02d}"
+    root = Path(a.root).resolve()
+    out_dir = root / "out"
+    ep_dir = root / f"ep{a.ep:02d}"
     script = json.loads((ep_dir / "script.json").read_text(encoding="utf-8"))
-    build = HERE / "build" / ep_dir.name
+    build = root / "build" / ep_dir.name
     audio = build / f"audio-{a.tts}"
     audio.mkdir(parents=True, exist_ok=True)
     data = load_draw(ep_dir, build / "scenes.json")
@@ -204,8 +206,8 @@ def main() -> None:
     if not all(f.exists() for f, _ in finals):
         print("[提示] 还有幕未渲染，暂不合并")
         return
-    OUT.mkdir(exist_ok=True)
-    out = OUT / f"{ep_dir.name}{'_竖屏' if a.vertical else ''}.mp4"
+    out_dir.mkdir(exist_ok=True)
+    out = out_dir / f"{ep_dir.name}{'_竖屏' if a.vertical else ''}.mp4"
     if len(finals) == 1:
         run(["cp", str(finals[0][0]), str(out)])
         print(f"OUTPUT={out}")

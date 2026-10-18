@@ -13,7 +13,7 @@
   .badge span { font-size: 17px; opacity: .7; }
   .chip { position: absolute; right: 34px; top: 30px; font: 700 24px 'LXGW WenKai', sans-serif; color: #22304a;
           background: #fff; border: 3px solid #22304a; border-radius: 22px; padding: 4px 18px; box-shadow: 4px 4px 0 #ffd23f; }
-  #cap { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); max-width: 1400px; white-space: nowrap;
+  #cap { position: absolute; left: 50%; bottom: 30px; transform: translateX(-50%); max-width: 1400px; width: max-content; white-space: normal; text-wrap: balance; text-align: center;
          font: 700 42px 'LXGW WenKai', sans-serif; color: #22304a; padding: 6px 26px 10px; border-radius: 14px;
          background: rgba(255,255,255,.88); box-shadow: 0 2px 0 rgba(34,48,74,.12); }
   #cap i { font-style: normal; background-repeat: no-repeat; background-position: 0 88%; background-size: 0% 38%;
@@ -236,6 +236,8 @@ function frame(t) {
       cap.innerHTML = `<i>${cur.text}</i>`; cap.dataset.key = cur.text;
       // 竖屏：长句缩小字号，保证最多两行，不压到底部小字
       if (G.vertical) cap.style.fontSize = (cur.text.length > 28 ? Math.floor(900 / Math.ceil(cur.text.length / 2)) : 60) + 'px';
+      // 横屏：超过一行（约 32 字）时折成两行、字号略小
+      else cap.style.fontSize = (cur.text.length > 32 ? 36 : 42) + 'px';
     }
     const k = Math.max(0, Math.min(1, (t - cur.start) / (cur.end - cur.start)));
     cap.firstChild.style.backgroundSize = `${(k * 100).toFixed(1)}% 38%`;
